@@ -307,3 +307,48 @@ AI 输出形式建议标准化为：
 7. 模板维护：可发布新版本、回滚；
 8. 方案生成模板：可选共享/个人；
 9. 审计日志：所有关键操作可追溯到人、时间、差异内容
+
+---
+
+## 后端实现说明（Spring Boot 2.6.15 + MyBatis-Plus + Knife4j）
+
+### 已交付能力（MVP）
+
+- 模板库：模板创建、更新、删除、筛选查询、发布新版本。
+- 方案管理：创建草稿、更新、列表查询、发起申请。
+- 稽核闭环：
+  - 规则稽核（必填、时间顺序、一致性）
+  - AI辅助稽核（软建议，输出问题清单）
+  - 稽核记录落库（可追溯）
+- 方案生成模板：支持共享/个人、去个性化。
+
+### 技术栈
+
+- Spring Boot `2.6.15`
+- MyBatis-Plus `3.5.5`
+- Knife4j（Swagger2）`4.4.0`
+- H2 内存数据库（演示环境）
+
+### 启动说明
+
+```bash
+mvn spring-boot:run
+```
+
+- Knife4j 文档地址：`http://localhost:8080/doc.html`
+- H2 控制台：`http://localhost:8080/h2-console`
+
+### 关键接口
+
+- 模板：`/api/templates`
+  - `POST /query` 筛选
+  - `POST /` 创建
+  - `PUT /{id}` 更新
+  - `DELETE /{id}` 删除
+  - `POST /{id}/publish` 发布新版本
+  - `POST /from-plan/{planId}` 由方案生成模板
+- 方案：`/api/plans`
+  - `POST /` 创建草稿（自动计算时间点）
+  - `PUT /{id}` 更新
+  - `GET /` 列表
+  - `POST /{id}/submit` 发起申请并触发稽核
